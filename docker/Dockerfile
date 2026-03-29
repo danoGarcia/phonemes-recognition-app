@@ -16,6 +16,7 @@ RUN pip install --no-cache-dir poetry
 COPY ../backend/pyproject.toml ./backend/
 
 WORKDIR /app/backend
+RUN poetry lock
 RUN poetry install --no-root
 
 # ---- Frontend deps ----
