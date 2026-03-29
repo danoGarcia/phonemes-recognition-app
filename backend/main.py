@@ -4,6 +4,9 @@ from fastapi import FastAPI
 from sqlalchemy.ext.asyncio import create_async_engine
 
 from app.api.v1.dictionary import router as dictionary_router
+from app.api.v1.evaluation import get_phoneme_model
+from app.api.v1.evaluation import router as evaluation_router
+from app.ml.phoneme_model import load_phoneme_model
 from app.api.v1.word_lists import router as word_lists_router
 from app.core.config import get_settings
 from app.models.base import Base
@@ -13,6 +16,10 @@ import app.models.word_list  # noqa: F401
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    model = load_phoneme_model()
+    app.dependency_overrides[get_phoneme_model] = lambda: model
+    yield
+    app.dependency_overrides.clear()
     engine = create_async_engine(get_settings().database_url)
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
@@ -23,6 +30,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 app.include_router(dictionary_router, prefix="/api/v1")
+app.include_router(evaluation_router, prefix="/api/v1")
 app.include_router(word_lists_router, prefix="/api/v1")
 
 
