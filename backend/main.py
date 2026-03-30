@@ -31,6 +31,8 @@ app.add_middleware(
 
 app.include_router(items_router, prefix="/api/v1")
 
+app.include_router(dictionary_router, prefix="/api/v1")
+
 
 @app.get("/")
 async def read_root():
